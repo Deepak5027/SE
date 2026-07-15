@@ -1,0 +1,91 @@
+import { useState } from "react";
+import { ChevronLeft, ChevronRight, ArrowRight, ArrowLeft, CheckCircle2, Circle, Clock, GitBranch, GitMerge, GitPullRequest, Package, Server, Terminal, Database, Globe, Layers, Users, BookOpen, BarChart2, Shield, Cpu, Zap, Truck, ShoppingCart, GraduationCap, Library, Lock, Code } from "lucide-react";
+
+/* ─────────── shared helpers ─────────── */
+const mono = { fontFamily: "'JetBrains Mono', monospace" };
+const sans = { fontFamily: "'Inter', sans-serif" };
+
+function Badge({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${color}`} style={sans}>
+      {children}
+    </span>
+  );
+}
+
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-card border border-border rounded-xl shadow-sm ${className}`}>
+      {children}
+    </div>
+  );
+}
+/* ─────────── TASK 9: Scrum Sprint Board ─────────── */
+function Task9() {
+  type Status = "backlog" | "todo" | "inprogress" | "done";
+  const [items, setItems] = useState([
+    { id: 1, title: "Create user registration page", points: 3, status: "done" as Status },
+    { id: 2, title: "Develop API for login", points: 5, status: "inprogress" as Status },
+    { id: 3, title: "Build book search functionality", points: 8, status: "inprogress" as Status },
+    { id: 4, title: "Create user dashboard", points: 5, status: "todo" as Status },
+    { id: 5, title: "Implement notification system", points: 3, status: "backlog" as Status },
+    { id: 6, title: "Setup CI/CD pipeline", points: 8, status: "backlog" as Status },
+    { id: 7, title: "Write unit tests for auth", points: 3, status: "todo" as Status },
+  ]);
+
+  const cols: { id: Status; label: string; color: string }[] = [
+    { id: "backlog", label: "Backlog", color: "bg-gray-100 text-gray-600" },
+    { id: "todo", label: "To Do", color: "bg-blue-100 text-blue-700" },
+    { id: "inprogress", label: "In Progress", color: "bg-amber-100 text-amber-700" },
+    { id: "done", label: "Done", color: "bg-emerald-100 text-emerald-700" },
+  ];
+
+  const totalPoints = items.reduce((s, i) => s + i.points, 0);
+  const donePoints = items.filter(i => i.status === "done").reduce((s, i) => s + i.points, 0);
+
+  return (
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h2 className="text-xl font-semibold" style={sans}>Sprint Board — Library Management System</h2>
+          <p className="text-sm text-muted-foreground" style={sans}>Sprint 1 · Jul 14 – Jul 21, 2026</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground" style={sans}>Velocity</p>
+            <p className="text-lg font-bold text-primary" style={mono}>{donePoints}/{totalPoints} pts</p>
+          </div>
+          <div className="w-24 h-2 bg-secondary rounded-full overflow-hidden"><div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(donePoints / totalPoints) * 100}%` }} /></div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-4 gap-3">
+        {cols.map(col => {
+          const colItems = items.filter(i => i.status === col.id);
+          return (
+            <div key={col.id} className="bg-secondary/50 rounded-xl p-3 border border-border">
+              <div className="flex items-center justify-between mb-3">
+                <Badge color={col.color}>{col.label}</Badge>
+                <span className="text-xs text-muted-foreground" style={mono}>{colItems.length}</span>
+              </div>
+              <div className="space-y-2">
+                {colItems.map(item => (
+                  <div key={item.id} className="bg-card border border-border rounded-lg p-2.5 shadow-sm">
+                    <p className="text-xs font-medium mb-2 leading-snug" style={sans}>{item.title}</p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground px-1.5 py-0.5 bg-secondary rounded" style={mono}>{item.points} pts</span>
+                      <div className="flex gap-0.5">
+                        {col.id !== "backlog" && <button onClick={() => setItems(p => p.map(i => i.id === item.id ? { ...i, status: cols[cols.findIndex(c => c.id === col.id) - 1].id } : i))} className="w-5 h-5 rounded flex items-center justify-center hover:bg-secondary text-muted-foreground text-xs">←</button>}
+                        {col.id !== "done" && <button onClick={() => setItems(p => p.map(i => i.id === item.id ? { ...i, status: cols[cols.findIndex(c => c.id === col.id) + 1].id } : i))} className="w-5 h-5 rounded flex items-center justify-center hover:bg-secondary text-muted-foreground text-xs">→</button>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

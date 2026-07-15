@@ -1,0 +1,81 @@
+import { useState } from "react";
+import { ChevronLeft, ChevronRight, ArrowRight, ArrowLeft, CheckCircle2, Circle, Clock, GitBranch, GitMerge, GitPullRequest, Package, Server, Terminal, Database, Globe, Layers, Users, BookOpen, BarChart2, Shield, Cpu, Zap, Truck, ShoppingCart, GraduationCap, Library, Lock, Code } from "lucide-react";
+
+/* ─────────── shared helpers ─────────── */
+const mono = { fontFamily: "'JetBrains Mono', monospace" };
+const sans = { fontFamily: "'Inter', sans-serif" };
+
+function Badge({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${color}`} style={sans}>
+      {children}
+    </span>
+  );
+}
+
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-card border border-border rounded-xl shadow-sm ${className}`}>
+      {children}
+    </div>
+  );
+}
+/* ─────────── TASK 7: Security Management UML ─────────── */
+function Task7() {
+  const [tab, setTab] = useState<"class" | "usecase" | "activity">("class");
+  return (
+    <div className="p-6 max-w-5xl mx-auto">
+      <h2 className="text-xl font-semibold mb-1" style={sans}>Online Security Management — UML Diagrams</h2>
+      <div className="flex gap-2 mb-6">
+        {(["class", "usecase", "activity"] as const).map(t => (
+          <button key={t} onClick={() => setTab(t)} className={`px-3 py-1.5 rounded-lg text-sm capitalize transition-colors ${tab === t ? "bg-primary text-white" : "bg-secondary text-muted-foreground"}`} style={sans}>{t} diagram</button>
+        ))}
+      </div>
+
+      {tab === "class" && (
+        <div className="bg-secondary/40 rounded-xl p-6 overflow-auto">
+          <div className="flex flex-wrap gap-6 min-w-max">
+            <UMLClass name="SecurityPersonnel" attrs={["id: int", "name: String", "phone: String"]} methods={["viewSchedule", "applyLeave", "viewSalary"]} />
+            <UMLClass name="DutySchedule" attrs={["scheduleId: int", "date: Date", "startTime: Time", "endTime: Time", "location: String"]} methods={["assign", "modify", "cancel"]} color="bg-violet-50 border-violet-200" />
+            <UMLClass name="LeaveRecord" attrs={["leaveId: int", "date: Date", "reason: String", "status: String"]} methods={["apply", "approve", "reject"]} color="bg-amber-50 border-amber-200" />
+            <UMLClass name="SalaryReport" attrs={["reportId: int", "month: int", "basePay: float", "deductions: float"]} methods={["calculate", "generate", "export"]} color="bg-emerald-50 border-emerald-200" />
+            <UMLClass name="Admin" attrs={["adminId: int", "role: String"]} methods={["managePersonnel", "generateReport", "approveLeave"]} color="bg-rose-50 border-rose-200" />
+          </div>
+        </div>
+      )}
+
+      {tab === "usecase" && (
+        <div className="bg-secondary/40 rounded-xl p-6">
+          <div className="flex gap-6 items-start">
+            {[
+              { actor: "Security Guard", icon: <Shield size={20} />, cases: ["View Duty Schedule", "Apply for Leave", "View Salary Slip", "Check Assigned Location"] },
+              { actor: "Admin", icon: <Users size={20} />, cases: ["Assign Duty Schedule", "Manage Personnel", "Approve Leave", "Generate Monthly Report", "Calculate Salary"] },
+            ].map(a => (
+              <div key={a.actor} className="flex-1">
+                <div className="flex items-center gap-2 mb-3"><div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">{a.icon}</div><span className="font-semibold text-sm" style={sans}>{a.actor}</span></div>
+                <div className="border-2 border-primary/30 rounded-xl p-3 space-y-2">
+                  {a.cases.map(c => <div key={c} className="bg-card border border-border rounded-full px-3 py-1 text-xs text-center" style={sans}>{c}</div>)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {tab === "activity" && (
+        <div className="bg-secondary/40 rounded-xl p-6 flex justify-center">
+          <div className="grid grid-cols-2 gap-x-12 gap-y-2 text-center max-w-lg">
+            <div className="font-semibold text-sm border-b border-border pb-2 mb-2" style={sans}>Guard Actions</div>
+            <div className="font-semibold text-sm border-b border-border pb-2 mb-2" style={sans}>Admin Actions</div>
+            {[["Check assigned location", "Generate duty roster"], ["Perform duty", "Monitor attendance"], ["Apply for leave", "Review leave application"], ["Submit duty report", "Calculate salary"]].map(([g, a], i) => (
+              <>
+                <div key={`g${i}`} className="bg-card border border-border rounded-lg px-3 py-2 text-xs" style={sans}>{g}</div>
+                <div key={`a${i}`} className="bg-primary/10 border border-primary/30 rounded-lg px-3 py-2 text-xs" style={sans}>{a}</div>
+              </>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kanban Board</title>
+<style>
+  :root{
+    --bg:#F5F4F0;
+    --surface:#FFFFFF;
+    --border:#E2E0D8;
+    --border-strong:#CFCCC0;
+    --text-primary:#2B2A26;
+    --text-secondary:#6B6A62;
+    --text-muted:#9A988E;
+    --accent:#3D5A80;
+    --todo:#8A8778;
+    --todo-bg:#EFEEE7;
+    --progress:#B4790C;
+    --progress-bg:#FBF0DB;
+    --done:#3F7D52;
+    --done-bg:#E6F1E9;
+    --radius:10px;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:var(--font);
+    background:var(--bg);
+    color:var(--text-primary);
+    padding:32px 24px 60px;
+  }
+  .header{
+    max-width:1100px;
+    margin:0 auto 28px;
+  }
+  .header h1{
+    font-size:22px;
+    font-weight:600;
+    margin:0 0 4px;
+    letter-spacing:-0.01em;
+  }
+  .header p{
+    font-size:14px;
+    color:var(--text-secondary);
+    margin:0;
+  }
+  .board{
+    max-width:1100px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:16px;
+  }
+  @media (max-width:760px){
+    .board{grid-template-columns:1fr;}
+  }
+  .column{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    display:flex;
+    flex-direction:column;
+    min-height:120px;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .column.drag-over{
+    background:var(--todo-bg);
+    border-color:var(--border-strong);
+  }
+  .column-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:14px 14px 10px;
+    border-bottom:1px solid var(--border);
+  }
+  .column-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:14px;
+    font-weight:600;
+  }
+  .dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+  .dot.todo{background:var(--todo);}
+  .dot.progress{background:var(--progress);}
+  .dot.done{background:var(--done);}
+  .count{
+    font-size:12px;
+    color:var(--text-muted);
+    background:var(--bg);
+    padding:1px 8px;
+    border-radius:999px;
+    min-width:20px;
+    text-align:center;
+  }
+  .card-list{
+    flex:1;
+    padding:10px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    min-height:80px;
+  }
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding:10px 12px;
+    cursor:grab;
+    font-size:13px;
+    line-height:1.5;
+    box-shadow:0 1px 2px rgba(0,0,0,0.03);
+  }
+  .card:active{cursor:grabbing;}
+  .card.dragging{
+    opacity:0.4;
+  }
+  .card-title{
+    font-weight:500;
+    margin:0 0 4px;
+    color:var(--text-primary);
+  }
+  .card-meta{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:6px;
+  }
+  .tag{
+    font-size:11px;
+    font-weight:500;
+    padding:2px 8px;
+    border-radius:999px;
+  }
+  .tag.high{background:#FBEAF0;color:#993556;}
+  .tag.medium{background:var(--progress-bg);color:var(--progress);}
+  .tag.low{background:var(--todo-bg);color:var(--todo);}
+  .card-actions{
+    display:flex;
+    gap:4px;
+  }
+  .move-btn{
+    border:none;
+    background:transparent;
+    color:var(--text-muted);
+    font-size:14px;
+    cursor:pointer;
+    padding:2px 5px;
+    border-radius:4px;
+    line-height:1;
+  }
+  .move-btn:hover{
+    background:var(--bg);
+    color:var(--text-primary);
+  }
+  .empty-hint{
+    font-size:12px;
+    color:var(--text-muted);
+    text-align:center;
+    padding:16px 8px;
+    border:1px dashed var(--border-strong);
+    border-radius:8px;
+    margin:2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Project kanban board</h1>
+  <p>Drag a card to another column, or use the arrows on each card.</p>
+</div>
+
+<div class="board" id="board">
+  <div class="column" data-status="todo">
+    <div class="column-head">
+      <div class="column-title"><span class="dot todo"></span>To do</div>
+      <span class="count" id="count-todo">0</span>
+    </div>
+    <div class="card-list" data-status="todo" id="list-todo"></div>
+  </div>
+
+  <div class="column" data-status="progress">
+    <div class="column-head">
+      <div class="column-title"><span class="dot progress"></span>In progress</div>
+      <span class="count" id="count-progress">0</span>
+    </div>
+    <div class="card-list" data-status="progress" id="list-progress"></div>
+  </div>
+
+  <div class="column" data-status="done">
+    <div class="column-head">
+      <div class="column-title"><span class="dot done"></span>Done</div>
+      <span class="count" id="count-done">0</span>
+    </div>
+    <div class="card-list" data-status="done" id="list-done"></div>
+  </div>
+</div>
+
+<script>
+let tasks = [
+  {id:1, title:"Design homepage wireframe", tag:"medium", status:"todo"},
+  {id:2, title:"Set up project repository", tag:"low", status:"todo"},
+  {id:3, title:"Write API documentation", tag:"low", status:"todo"},
+  {id:4, title:"Build login page UI", tag:"high", status:"progress"},
+  {id:5, title:"Integrate payment gateway", tag:"high", status:"progress"},
+  {id:6, title:"Fix navbar responsiveness bug", tag:"medium", status:"done"},
+  {id:7, title:"Deploy staging environment", tag:"medium", status:"done"}
+];
+
+const order = ["todo","progress","done"];
+
+function render(){
+  order.forEach(status=>{
+    const list = document.getElementById("list-"+status);
+    list.innerHTML = "";
+    const items = tasks.filter(t=>t.status===status);
+    document.getElementById("count-"+status).textContent = items.length;
+    if(items.length === 0){
+      const hint = document.createElement("div");
+      hint.className = "empty-hint";
+      hint.textContent = "Drop a task here";
+      list.appendChild(hint);
+      return;
+    }
+    items.forEach(task=>{
+      const card = document.createElement("div");
+      card.className = "card";
+      card.draggable = true;
+      card.dataset.id = task.id;
+
+      const idx = order.indexOf(status);
+      const prevBtn = idx > 0 ? `<button class="move-btn" aria-label="Move left" data-dir="-1" data-id="${task.id}">&larr;</button>` : "";
+      const nextBtn = idx < order.length-1 ? `<button class="move-btn" aria-label="Move right" data-dir="1" data-id="${task.id}">&rarr;</button>` : "";
+
+      card.innerHTML = `
+        <p class="card-title">${task.title}</p>
+        <div class="card-meta">
+          <span class="tag ${task.tag}">${task.tag}</span>
+          <div class="card-actions">${prevBtn}${nextBtn}</div>
+        </div>
+      `;
+
+      card.addEventListener("dragstart", ()=>{
+        card.classList.add("dragging");
+      });
+      card.addEventListener("dragend", ()=>{
+        card.classList.remove("dragging");
+      });
+
+      list.appendChild(card);
+    });
+  });
+
+  document.querySelectorAll(".move-btn").forEach(btn=>{
+    btn.addEventListener("click", (e)=>{
+      const id = parseInt(btn.dataset.id);
+      const dir = parseInt(btn.dataset.dir);
+      const task = tasks.find(t=>t.id===id);
+      const idx = order.indexOf(task.status);
+      task.status = order[idx+dir];
+      render();
+    });
+  });
+}
+
+document.querySelectorAll(".column").forEach(col=>{
+  col.addEventListener("dragover", (e)=>{
+    e.preventDefault();
+    col.classList.add("drag-over");
+  });
+  col.addEventListener("dragleave", ()=>{
+    col.classList.remove("drag-over");
+  });
+  col.addEventListener("drop", (e)=>{
+    e.preventDefault();
+    col.classList.remove("drag-over");
+    const dragging = document.querySelector(".dragging");
+    if(!dragging) return;
+    const id = parseInt(dragging.dataset.id);
+    const status = col.dataset.status;
+    const task = tasks.find(t=>t.id===id);
+    task.status = status;
+    render();
+  });
+});
+
+render();
+</script>
+
+</body>
+</html>

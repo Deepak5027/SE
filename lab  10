@@ -1,0 +1,80 @@
+import { useState } from "react";
+import { ChevronLeft, ChevronRight, ArrowRight, ArrowLeft, CheckCircle2, Circle, Clock, GitBranch, GitMerge, GitPullRequest, Package, Server, Terminal, Database, Globe, Layers, Users, BookOpen, BarChart2, Shield, Cpu, Zap, Truck, ShoppingCart, GraduationCap, Library, Lock, Code } from "lucide-react";
+
+/* ─────────── shared helpers ─────────── */
+const mono = { fontFamily: "'JetBrains Mono', monospace" };
+const sans = { fontFamily: "'Inter', sans-serif" };
+
+function Badge({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${color}`} style={sans}>
+      {children}
+    </span>
+  );
+}
+
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-card border border-border rounded-xl shadow-sm ${className}`}>
+      {children}
+    </div>
+  );
+}
+/* ─────────── TASK 10: MoSCoW Analysis ─────────── */
+function Task10() {
+  const requirements = [
+    { id: 1, req: "Search books by title and author", cat: "Must", reason: "Core functionality; without it the system is unusable." },
+    { id: 2, req: "Online book reservation system", cat: "Must", reason: "Primary user need; enables remote borrowing." },
+    { id: 3, req: "Monthly reports on borrowed books", cat: "Should", reason: "Important for admin insights but not critical for launch." },
+    { id: 4, req: "Email notifications for overdue books", cat: "Should", reason: "Reduces fines and improves user experience." },
+    { id: 5, req: "QR code scanning for borrowing/returning", cat: "Could", reason: "Enhances UX but manual entry is an alternative." },
+    { id: 6, req: "User-friendly dashboard for librarians", cat: "Must", reason: "Needed for efficient daily operations." },
+    { id: 7, req: "Allow users to review and rate books", cat: "Could", reason: "Adds value but not essential for core workflow." },
+    { id: 8, req: "Chatbot for user assistance", cat: "Won't", reason: "High complexity, low immediate ROI; deferred to v2." },
+    { id: 9, req: "Mobile app version of the system", cat: "Could", reason: "Desirable but web-first approach sufficient initially." },
+    { id: 10, req: "Multi-language support", cat: "Won't", reason: "Out of scope for initial release; complex to implement." },
+  ];
+
+  const colors: Record<string, string> = {
+    Must: "bg-red-100 text-red-700 border-red-200",
+    Should: "bg-amber-100 text-amber-700 border-amber-200",
+    Could: "bg-blue-100 text-blue-700 border-blue-200",
+    "Won't": "bg-gray-100 text-gray-600 border-gray-200",
+  };
+
+  return (
+    <div className="p-6 max-w-5xl mx-auto">
+      <h2 className="text-xl font-semibold mb-1" style={sans}>Library Management System — MoSCoW Analysis</h2>
+      <p className="text-sm text-muted-foreground mb-4" style={sans}>Requirements categorized by impact and feasibility.</p>
+
+      <div className="flex gap-3 mb-5">
+        {Object.entries(colors).map(([k, v]) => (
+          <div key={k} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium ${v}`} style={sans}>
+            {k} — {requirements.filter(r => r.cat === k).length}
+          </div>
+        ))}
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-border shadow-sm">
+        <table className="w-full text-sm">
+          <thead><tr className="bg-secondary border-b border-border">
+            <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider" style={sans}>#</th>
+            <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider" style={sans}>Requirement</th>
+            <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider" style={sans}>Category</th>
+            <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider" style={sans}>Justification</th>
+          </tr></thead>
+          <tbody>
+            {requirements.map((r, i) => (
+              <tr key={r.id} className={`border-b border-border last:border-0 ${i % 2 === 0 ? "bg-card" : "bg-secondary/30"}`}>
+                <td className="px-4 py-3 text-muted-foreground" style={mono}>{String(r.id).padStart(2, "0")}</td>
+                <td className="px-4 py-3 font-medium" style={sans}>{r.req}</td>
+                <td className="px-4 py-3"><Badge color={colors[r.cat]}>{r.cat}</Badge></td>
+                <td className="px-4 py-3 text-muted-foreground text-xs" style={sans}>{r.reason}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

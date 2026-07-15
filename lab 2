@@ -1,0 +1,127 @@
+import { useState } from "react";
+import { ChevronLeft, ChevronRight, ArrowRight, ArrowLeft, CheckCircle2, Circle, Clock, GitBranch, GitMerge, GitPullRequest, Package, Server, Terminal, Database, Globe, Layers, Users, BookOpen, BarChart2, Shield, Cpu, Zap, Truck, ShoppingCart, GraduationCap, Library, Lock, Code } from "lucide-react";
+
+/* ─────────── shared helpers ─────────── */
+const mono = { fontFamily: "'JetBrains Mono', monospace" };
+const sans = { fontFamily: "'Inter', sans-serif" };
+
+function Badge({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${color}`} style={sans}>
+      {children}
+    </span>
+  );
+}
+
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-card border border-border rounded-xl shadow-sm ${className}`}>
+      {children}
+    </div>
+  );
+}
+/* ─────────── TASK 2: Bus Ticket Booking ─────────── */
+function Task2() {
+  const [from, setFrom] = useState("Chennai");
+  const [to, setTo] = useState("Bangalore");
+  const [date, setDate] = useState("2026-07-20");
+  const [seat, setSeat] = useState<number | null>(null);
+  const [step, setStep] = useState(1);
+
+  const seats = Array.from({ length: 40 }, (_, i) => i + 1);
+  const booked = [3, 7, 12, 15, 22, 28, 35];
+
+  return (
+    <div className="p-8 max-w-4xl mx-auto">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center"><Truck size={18} className="text-primary" /></div>
+        <div>
+          <h2 className="text-xl font-semibold" style={sans}>Bus Ticket Booking</h2>
+          <p className="text-sm text-muted-foreground" style={sans}>Book your intercity bus ticket</p>
+        </div>
+      </div>
+
+      {/* Steps */}
+      <div className="flex items-center gap-3 mb-8">
+        {["Route & Date", "Select Seat", "Confirm"].map((s, i) => (
+          <div key={s} className="flex items-center gap-2">
+            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold ${step > i + 1 ? "bg-emerald-500 text-white" : step === i + 1 ? "bg-primary text-white" : "bg-secondary text-muted-foreground"}`} style={mono}>{step > i + 1 ? "✓" : i + 1}</div>
+            <span className={`text-sm ${step === i + 1 ? "text-foreground font-medium" : "text-muted-foreground"}`} style={sans}>{s}</span>
+            {i < 2 && <div className="w-12 h-px bg-border mx-1" />}
+          </div>
+        ))}
+      </div>
+
+      {step === 1 && (
+        <Card className="p-6 max-w-md">
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider" style={sans}>From</label>
+              <select value={from} onChange={e => setFrom(e.target.value)} className="mt-1 w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm" style={sans}>
+                {["Chennai", "Bangalore", "Hyderabad", "Mumbai", "Delhi"].map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider" style={sans}>To</label>
+              <select value={to} onChange={e => setTo(e.target.value)} className="mt-1 w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm" style={sans}>
+                {["Bangalore", "Chennai", "Hyderabad", "Mumbai", "Delhi"].map(c => <option key={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider" style={sans}>Date</label>
+              <input type="date" value={date} onChange={e => setDate(e.target.value)} className="mt-1 w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm" style={sans} />
+            </div>
+            <button onClick={() => setStep(2)} className="w-full bg-primary text-primary-foreground rounded-lg py-2.5 text-sm font-semibold hover:bg-primary/90 transition-colors" style={sans}>
+              Search Buses →
+            </button>
+          </div>
+        </Card>
+      )}
+
+      {step === 2 && (
+        <div className="space-y-4">
+          <Card className="p-4">
+            <p className="text-sm font-medium mb-1" style={sans}>{from} → {to} · {date}</p>
+            <p className="text-xs text-muted-foreground" style={sans}>AC Sleeper · Dep 22:00 · Arr 06:00 · ₹850</p>
+          </Card>
+          <Card className="p-5">
+            <p className="text-sm font-semibold mb-3" style={sans}>Select your seat</p>
+            <div className="flex gap-3 mb-4 text-xs text-muted-foreground" style={sans}>
+              <span className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-secondary border border-border inline-block" />Available</span>
+              <span className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-primary inline-block" />Selected</span>
+              <span className="flex items-center gap-1"><span className="w-4 h-4 rounded bg-gray-200 inline-block" />Booked</span>
+            </div>
+            <div className="grid grid-cols-10 gap-1.5 max-w-sm">
+              {seats.map(s => (
+                <button key={s} disabled={booked.includes(s)} onClick={() => setSeat(s)}
+                  className={`w-7 h-7 rounded text-xs font-medium transition-colors ${booked.includes(s) ? "bg-gray-200 text-gray-400 cursor-not-allowed" : seat === s ? "bg-primary text-white" : "bg-secondary border border-border hover:border-primary"}`} style={mono}>
+                  {s}
+                </button>
+              ))}
+            </div>
+            {seat && <p className="mt-3 text-sm text-emerald-600 font-medium" style={sans}>Seat {seat} selected ✓</p>}
+            <div className="flex gap-2 mt-4">
+              <button onClick={() => setStep(1)} className="px-4 py-2 rounded-lg border border-border text-sm" style={sans}>Back</button>
+              <button disabled={!seat} onClick={() => setStep(3)} className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold disabled:opacity-40 hover:bg-primary/90 transition-colors" style={sans}>Continue →</button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {step === 3 && (
+        <Card className="p-6 max-w-md">
+          <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4"><CheckCircle2 size={24} className="text-emerald-600" /></div>
+          <h3 className="text-center text-lg font-semibold mb-1" style={sans}>Booking Confirmed!</h3>
+          <p className="text-center text-sm text-muted-foreground mb-4" style={sans}>Your ticket has been booked successfully</p>
+          <div className="bg-secondary rounded-lg p-4 space-y-2 text-sm" style={sans}>
+            <div className="flex justify-between"><span className="text-muted-foreground">Route</span><span className="font-medium">{from} → {to}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Date</span><span className="font-medium">{date}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Seat</span><span className="font-medium">{seat}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Amount</span><span className="font-semibold text-primary">₹850</span></div>
+          </div>
+          <button onClick={() => { setStep(1); setSeat(null); }} className="mt-4 w-full border border-border rounded-lg py-2 text-sm hover:bg-secondary transition-colors" style={sans}>Book Another Ticket</button>
+        </Card>
+      )}
+    </div>
+  );
+}

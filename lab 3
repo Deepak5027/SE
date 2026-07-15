@@ -1,0 +1,117 @@
+import { useState } from "react";
+import { ChevronLeft, ChevronRight, ArrowRight, ArrowLeft, CheckCircle2, Circle, Clock, GitBranch, GitMerge, GitPullRequest, Package, Server, Terminal, Database, Globe, Layers, Users, BookOpen, BarChart2, Shield, Cpu, Zap, Truck, ShoppingCart, GraduationCap, Library, Lock, Code } from "lucide-react";
+
+/* ─────────── shared helpers ─────────── */
+const mono = { fontFamily: "'JetBrains Mono', monospace" };
+const sans = { fontFamily: "'Inter', sans-serif" };
+
+function Badge({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${color}`} style={sans}>
+      {children}
+    </span>
+  );
+}
+
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-card border border-border rounded-xl shadow-sm ${className}`}>
+      {children}
+    </div>
+  );
+}
+/* ─────────── TASK 3: E-Commerce Mobile App ─────────── */
+function Task3() {
+  const [cart, setCart] = useState<number[]>([]);
+  const [view, setView] = useState<"products" | "cart" | "checkout">("products");
+
+  const products = [
+    { id: 1, name: "Wireless Headphones", price: 2499, rating: 4.5, category: "Electronics" },
+    { id: 2, name: "Running Shoes", price: 3299, rating: 4.3, category: "Sports" },
+    { id: 3, name: "Cotton T-Shirt", price: 699, rating: 4.1, category: "Clothing" },
+    { id: 4, name: "Coffee Maker", price: 4599, rating: 4.7, category: "Home" },
+    { id: 5, name: "Yoga Mat", price: 999, rating: 4.4, category: "Sports" },
+    { id: 6, name: "Smartwatch", price: 8999, rating: 4.6, category: "Electronics" },
+  ];
+
+  const colors = ["bg-blue-100 text-blue-700", "bg-violet-100 text-violet-700", "bg-emerald-100 text-emerald-700", "bg-amber-100 text-amber-700"];
+  const total = cart.reduce((sum, id) => sum + (products.find(p => p.id === id)?.price ?? 0), 0);
+
+  return (
+    <div className="p-6 max-w-5xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-rose-100 flex items-center justify-center"><ShoppingCart size={16} className="text-rose-600" /></div>
+          <h2 className="text-xl font-semibold" style={sans}>StyleShop</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          {(["products", "cart", "checkout"] as const).map(v => (
+            <button key={v} onClick={() => setView(v)} className={`px-3 py-1.5 rounded-lg text-sm capitalize transition-colors ${view === v ? "bg-primary text-white" : "bg-secondary text-muted-foreground hover:text-foreground"}`} style={sans}>
+              {v}{v === "cart" ? ` (${cart.length})` : ""}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {view === "products" && (
+        <div className="grid grid-cols-3 gap-4">
+          {products.map((p, i) => (
+            <Card key={p.id} className="p-4 hover:shadow-md transition-shadow">
+              <div className={`h-28 rounded-lg mb-3 flex items-center justify-center ${colors[i % 4]}`}>
+                <ShoppingCart size={32} className="opacity-40" />
+              </div>
+              <Badge color={colors[i % 4]}>{p.category}</Badge>
+              <p className="text-sm font-semibold mt-2 mb-1" style={sans}>{p.name}</p>
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-primary" style={sans}>₹{p.price.toLocaleString()}</span>
+                <span className="text-xs text-amber-500" style={sans}>★ {p.rating}</span>
+              </div>
+              <button
+                onClick={() => setCart(c => cart.includes(p.id) ? c.filter(x => x !== p.id) : [...c, p.id])}
+                className={`mt-3 w-full py-1.5 rounded-lg text-xs font-semibold transition-colors ${cart.includes(p.id) ? "bg-emerald-500 text-white" : "bg-primary text-white hover:bg-primary/90"}`} style={sans}>
+                {cart.includes(p.id) ? "✓ Added to Cart" : "Add to Cart"}
+              </button>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {view === "cart" && (
+        <div className="max-w-md">
+          {cart.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground" style={sans}>Your cart is empty. <button className="text-primary hover:underline" onClick={() => setView("products")}>Browse products</button></div>
+          ) : (
+            <div className="space-y-3">
+              {cart.map(id => {
+                const p = products.find(x => x.id === id)!;
+                return (
+                  <Card key={id} className="p-3 flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg bg-secondary flex items-center justify-center shrink-0"><ShoppingCart size={16} className="text-muted-foreground" /></div>
+                    <div className="flex-1"><p className="text-sm font-medium" style={sans}>{p.name}</p><p className="text-xs text-muted-foreground" style={sans}>{p.category}</p></div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-primary" style={sans}>₹{p.price.toLocaleString()}</p>
+                      <button onClick={() => setCart(c => c.filter(x => x !== id))} className="text-xs text-red-400 hover:text-red-600" style={sans}>Remove</button>
+                    </div>
+                  </Card>
+                );
+              })}
+              <div className="flex items-center justify-between px-1 pt-2 border-t border-border">
+                <span className="font-semibold" style={sans}>Total: ₹{total.toLocaleString()}</span>
+                <button onClick={() => setView("checkout")} className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold" style={sans}>Checkout →</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {view === "checkout" && (
+        <Card className="p-6 max-w-md">
+          <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center mb-4"><CheckCircle2 size={20} className="text-emerald-600" /></div>
+          <h3 className="font-semibold text-lg mb-3" style={sans}>Order Placed!</h3>
+          <p className="text-sm text-muted-foreground mb-4" style={sans}>{cart.length} items · ₹{total.toLocaleString()} · Est. delivery in 3-5 days</p>
+          <button onClick={() => { setCart([]); setView("products"); }} className="w-full bg-primary text-white rounded-lg py-2 text-sm font-semibold" style={sans}>Continue Shopping</button>
+        </Card>
+      )}
+    </div>
+  );
+}

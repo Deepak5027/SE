@@ -1,0 +1,104 @@
+import { useState } from "react";
+import { ChevronLeft, ChevronRight, ArrowRight, ArrowLeft, CheckCircle2, Circle, Clock, GitBranch, GitMerge, GitPullRequest, Package, Server, Terminal, Database, Globe, Layers, Users, BookOpen, BarChart2, Shield, Cpu, Zap, Truck, ShoppingCart, GraduationCap, Library, Lock, Code } from "lucide-react";
+
+/* ─────────── shared helpers ─────────── */
+const mono = { fontFamily: "'JetBrains Mono', monospace" };
+const sans = { fontFamily: "'Inter', sans-serif" };
+
+function Badge({ color, children }: { color: string; children: React.ReactNode }) {
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${color}`} style={sans}>
+      {children}
+    </span>
+  );
+}
+
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`bg-card border border-border rounded-xl shadow-sm ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+/* ─────────── TASK 1: Kanban Board ─────────── */
+type KanbanTask = { id: number; title: string; priority: "high" | "medium" | "low"; col: "todo" | "inprogress" | "done" };
+function Task1() {
+  const [tasks, setTasks] = useState<KanbanTask[]>([
+    { id: 1, title: "Design homepage wireframe", priority: "medium", col: "todo" },
+    { id: 2, title: "Set up project repository", priority: "low", col: "todo" },
+    { id: 3, title: "Write API documentation", priority: "low", col: "todo" },
+    { id: 4, title: "Build login page UI", priority: "high", col: "inprogress" },
+    { id: 5, title: "Integrate payment gateway", priority: "high", col: "inprogress" },
+    { id: 6, title: "Fix navbar responsiveness bug", priority: "medium", col: "done" },
+    { id: 7, title: "Deploy staging environment", priority: "medium", col: "done" },
+  ]);
+
+  const cols: { id: KanbanTask["col"]; label: string; dot: string }[] = [
+    { id: "todo", label: "To do", dot: "bg-gray-400" },
+    { id: "inprogress", label: "In progress", dot: "bg-amber-400" },
+    { id: "done", label: "Done", dot: "bg-emerald-500" },
+  ];
+
+  function move(taskId: number, dir: -1 | 1) {
+    const order: KanbanTask["col"][] = ["todo", "inprogress", "done"];
+    setTasks((prev) =>
+      prev.map((t) => {
+        if (t.id !== taskId) return t;
+        const idx = order.indexOf(t.col);
+        const next = order[idx + dir];
+        return next ? { ...t, col: next } : t;
+      })
+    );
+  }
+
+  const pColor = { high: "bg-red-100 text-red-600", medium: "bg-amber-100 text-amber-700", low: "bg-gray-100 text-gray-500" };
+
+  return (
+    <div className="p-8 max-w-5xl mx-auto">
+      <h2 className="text-2xl font-semibold mb-1" style={sans}>Project kanban board</h2>
+      <p className="text-muted-foreground text-sm mb-8" style={sans}>Drag a card to another column, or use the arrows on each card.</p>
+      <div className="grid grid-cols-3 gap-5">
+        {cols.map((col) => {
+          const items = tasks.filter((t) => t.col === col.id);
+          return (
+            <div key={col.id} className="bg-secondary/50 rounded-xl p-4 border border-border">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${col.dot}`} />
+                  <span className="font-medium text-sm" style={sans}>{col.label}</span>
+                </div>
+                <span className="text-xs text-muted-foreground px-2 py-0.5 rounded-full bg-card border border-border" style={mono}>{items.length}</span>
+              </div>
+              <div className="space-y-2">
+                {items.map((t) => (
+                  <div key={t.id} className="bg-card border border-border rounded-lg p-3 shadow-sm">
+                    <p className="text-sm font-medium mb-2" style={sans}>{t.title}</p>
+                    <div className="flex items-center justify-between">
+                      <Badge color={pColor[t.priority]}>{t.priority}</Badge>
+                      <div className="flex items-center gap-1">
+                        {col.id !== "todo" && (
+                          <button onClick={() => move(t.id, -1)} className="w-6 h-6 rounded flex items-center justify-center hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                            <ArrowLeft size={12} />
+                          </button>
+                        )}
+                        {col.id !== "done" && (
+                          <button onClick={() => move(t.id, 1)} className="w-6 h-6 rounded flex items-center justify-center hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors">
+                            <ArrowRight size={12} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {items.length === 0 && (
+                  <div className="border-2 border-dashed border-border rounded-lg p-4 text-center text-xs text-muted-foreground">Drop here</div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
